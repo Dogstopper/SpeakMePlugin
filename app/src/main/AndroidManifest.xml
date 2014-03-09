@@ -4,7 +4,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="15"
         android:targetSdkVersion="16" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -13,19 +13,14 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
-         <!--<service android:name="speak.me.plugin.SpeakMePlugin"
+        <service
+            android:name="speak.me.plugin.SpeakMeReader"
+            android:label="speak_me_reader" >
+        </service>
+
+        <service android:name="speak.me.plugin.SpeakMeExamplePlugin"
                   android:exported="true">
-            <meta-data android:name="speak.me.keywords" android:value="brick,solid"/>
-            <intent-filter>
-                <action android:name="speak.me.action.PICK_PLUGIN" />
-                <category android:name="speak.me.category.DEFAULT_PLUGIN_CATEGORY" />
-            </intent-filter>
-        </service>-->
-        <service android:name="speak.me.plugin.TwitterTweetPlugin"
-                  android:exported="true">
-            <meta-data android:name="speak.me.keywords" android:value="twitter,tweet"/>
-            <meta-data android:name="speak.me.extras" android:value=""/>
+            <meta-data android:name="speak.me.keywords" android:value="test,example"/>
             <intent-filter>
                 <action android:name="speak.me.action.PICK_PLUGIN" />
                 <category android:name="speak.me.category.DEFAULT_PLUGIN_CATEGORY" />
