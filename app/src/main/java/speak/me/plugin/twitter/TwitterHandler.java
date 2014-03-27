@@ -6,6 +6,8 @@ import android.util.Log;
 
 import java.util.List;
 
+import twitter4j.Paging;
+import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -123,6 +125,51 @@ public class TwitterHandler {
         }
 
         new TweetTask().execute(text);
+    }
+
+    private ResponseList<Status> cache = null;
+    public String getFeedTweet(int tweetNum) {
+        int page = tweetNum/40+1;
+        int tweet = tweetNum%40;
+
+        if (cache == null) {
+            try {
+                cache = m_twitter.getHomeTimeline(new Paging(page,40));
+            } catch (TwitterException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (tweet >= cache.size()) {
+            long id = cache.get(cache.size()-1).getId();
+            try {
+                cache = m_twitter.getHomeTimeline(new Paging(id));
+            } catch (TwitterException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Status s = cache.get(tweet);
+        if (s.isRetweet()) {
+            return s.getUser().getName() + "re tweeted " + s.getText();
+        }
+        else {
+            return s.getUser().getName() + " said " + s.getText();
+        }
+    }
+
+    public boolean retweet(int tweetNum) {
+        if (cache != null) {
+            if (tweetNum < cache.size()) {
+                try {
+                    m_twitter.retweetStatus(cache.get(tweetNum).getId());
+                    return true;
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
 
     //The callback is run and passed the result when verification is complete
