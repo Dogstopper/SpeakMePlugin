@@ -65,19 +65,6 @@ public class AuthorizeActivity extends ActionBarActivity {
         loadAuthorizationUrlInWebView();
     }
 
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_authorize, container, false);
-            return rootView;
-        }
-    }
-
     private void loadAuthorizationUrlInWebView() {
         class GetAuthUrlTask extends AsyncTask<String, Void, Boolean> {
             private Exception exception;
