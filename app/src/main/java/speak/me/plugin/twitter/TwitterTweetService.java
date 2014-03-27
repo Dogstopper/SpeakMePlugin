@@ -6,6 +6,9 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import speak.me.plugin.SpeakMePlugin;
 import speak.me.plugin.twitter.TwitterHandler;
 
@@ -96,25 +99,20 @@ public class TwitterTweetService extends SpeakMePlugin {
         int nextIndex = 0;
         do {
             // Replace hashtags appropriately.
-            int hashtagIndex = text.toLowerCase().indexOf("hashtag", nextIndex);
-            int hashtagIndex2 = text.toLowerCase().indexOf("hash tag", nextIndex);
-            if (hashtagIndex == -1) {
-                hashtagIndex = hashtagIndex2;
-            } else if (hashtagIndex2 == -1) {
-                // LEave hashtagIndex the same
-            } else {
-                hashtagIndex = Math.min(hashtagIndex, hashtagIndex2);
+            final String[] hashtagStrings = new String[]{"hashtag", "has tag", "hash tag"};
+            List<Integer> discoveries = new LinkedList<Integer>();
+            for (String poss: hashtagStrings) {
+                discoveries.add(0,text.toLowerCase().indexOf(poss,nextIndex));
             }
+            int hashtagIndex = findNonNegativeMin(discoveries);
 
-            nextIndex = text.toLowerCase().indexOf("hashtag", hashtagIndex+1);
-            int nextIndex2 = text.toLowerCase().indexOf("hash tag", hashtagIndex+1);
-            if (nextIndex == -1) {
-                nextIndex = nextIndex2;
-            } else if (nextIndex2 == -1) {
-                // LEave hashtagIndex the same
-            } else {
-                nextIndex = Math.min(nextIndex, nextIndex2);
+            discoveries.clear();
+            discoveries = new LinkedList<Integer>();
+            for (String poss: hashtagStrings) {
+                discoveries.add(0, text.toLowerCase().indexOf(poss, hashtagIndex+1));
             }
+            nextIndex = findNonNegativeMin(discoveries);
+
             Log.d("TWITTER TWEET", "text: " + text);
             Log.d("TWITTER TWEET", "Hashtag index: " + hashtagIndex);
             Log.d("TWITTER TWEET", "NExtIndex:"  + nextIndex);
@@ -136,6 +134,17 @@ public class TwitterTweetService extends SpeakMePlugin {
 
         return text;
 
+    }
+
+    private int findNonNegativeMin(List<Integer> list)
+    {
+        int min = list.remove(0);
+        for (int item : list) {
+            if (item < min && item > 0) {
+                min = item;
+            }
+        }
+        return min;
     }
 
     private String fixHashtags(String hashtagString) {
