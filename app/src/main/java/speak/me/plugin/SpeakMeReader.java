@@ -11,18 +11,18 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class SpeakMeReader extends Service {
+public class SpeakMeReader {
 	private TextToSpeech tts;
-    private IBinder mBinder = new TTSBinder();
 
     private boolean speaking =  false;
-    private  String utteranceID = "utterance_id_speech";
+    private String utteranceID = "utterance_id_speech";
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+    public SpeakMeReader(Service parent) {
+//    @Override
+//    public void onCreate() {
+//        super.onCreate();
+//
+        tts = new TextToSpeech(parent.getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
@@ -63,19 +63,14 @@ public class SpeakMeReader extends Service {
         });
     }
 
-    public class TTSBinder extends Binder {
-        public void setupTTS() {
-            //SpeakMeReader.this.setupTTS();
-        }
 
-        public void invokeTTS(String text) {
-            if (text != null && text.trim().length() != 0) {
-                textToSpeech(text);
-            }
-        }
+    public boolean isDoneSpeaking() {
+        return speaking == false;
+    }
 
-        public boolean isDoneSpeaking() {
-            return speaking == false;
+    public void invokeTTS(String text) {
+        if (text != null && text.trim().length() != 0) {
+            textToSpeech(text);
         }
     }
 
@@ -89,10 +84,10 @@ public class SpeakMeReader extends Service {
 		tts.speak(text, TextToSpeech.QUEUE_FLUSH, voiceMap);
         Log.d("TTS", "finished Queueing");
 	}
-	
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return mBinder;
-	}
+//
+//	@Override
+//	public IBinder onBind(Intent arg0) {
+//		return mBinder;
+//	}
 
 }

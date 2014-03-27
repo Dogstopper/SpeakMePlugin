@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,8 +51,39 @@ public class TwitterTweetService extends SpeakMePlugin {
             return;
         }
 
-        // If we are logged in, then we should tweet!
+        boolean containsYes = false;
         String outputText = twitterify(text);
+        do {
+            // If we are logged in, then we should tweet!
+
+            invokeTTSReader("You said:");
+            invokeTTSReader(outputText);
+            String[] poss = queryUser("Do you want to post? Yes to post, no to re-record, quit to stop..",
+                    "I did not understand. Please repeat Yes, No, or quit", true, false);
+
+
+            for (String s : poss) {
+                if (s.equalsIgnoreCase("yes")) {
+                    containsYes = true;
+                }
+                if (s.equalsIgnoreCase("quit")) {
+                    invokeTTSReader("Cancelling");
+                    return;
+                }
+            }
+            if (!containsYes) {
+                String[] tweets = queryUser("Please repeat your tweet.",
+                        "I'm sorry, there seems to be a problem recognizing your voice",
+                        true, false);
+                Log.d("Tweeter", "Possibilities: " + Arrays.toString(tweets));
+                if (tweets.length > 0) {
+                    outputText = twitterify(tweets[0]);
+                } else {
+                    outputText = "";
+                }
+            }
+        } while(!containsYes);
+
 
         cb = new ResultCallback();
         handler.tweet(outputText, cb);
@@ -70,8 +102,6 @@ public class TwitterTweetService extends SpeakMePlugin {
         }
         if (cb.result) {
             invokeTTSReader("Tweet success!");
-            invokeTTSReader("You posted:");
-            invokeTTSReader(outputText);
         } else {
             invokeTTSReader("Tweet failed.");
         }
@@ -138,12 +168,15 @@ public class TwitterTweetService extends SpeakMePlugin {
 
     private int findNonNegativeMin(List<Integer> list)
     {
-        int min = list.remove(0);
+        Log.d("HASHTAGIFY", Arrays.toString(list.toArray()));
+        int min = Integer.MAX_VALUE;
         for (int item : list) {
-            if (item < min && item > 0) {
+            if (item < min && item >= 0) {
                 min = item;
             }
         }
+        if (min == Integer.MAX_VALUE)
+            min = -1;
         return min;
     }
 

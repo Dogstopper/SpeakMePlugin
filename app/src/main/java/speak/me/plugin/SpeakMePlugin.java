@@ -25,8 +25,12 @@ import android.widget.Toast;
  */
 public abstract class SpeakMePlugin extends Service {
 
-    private SpeakMeReader.TTSBinder ttsProvider;
-    private boolean ttsBound;
+    private SpeakMeReader ttsProvider;
+    private SpeakMeListener sttProvider;
+
+//    private boolean ttsBound;
+//    private boolean sttBound;
+
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
     private Intent callerIntent;
@@ -46,23 +50,30 @@ public abstract class SpeakMePlugin extends Service {
             sendBroadcast(stopIntent);
 
             // Bind to the services
-            Intent ttsBindIntent = new Intent(SpeakMePlugin.this, SpeakMeReader.class);
-            bindService(ttsBindIntent, mTTSConnection, Context.BIND_AUTO_CREATE);
-            synchronized (this) {
-                while (!ttsBound) {
-                    try {
-                        wait(20);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+//            Intent ttsBindIntent = new Intent(SpeakMePlugin.this, SpeakMeReader.class);
+//            bindService(ttsBindIntent, mTTSConnection, Context.BIND_AUTO_CREATE);
+//
+//            Intent sttBindIntent = new Intent(SpeakMePlugin.this, SpeakMeListener.class);
+//            bindService(sttBindIntent, mSTTConnection, Context.BIND_AUTO_CREATE);
+//            synchronized (this) {
+//                while (!ttsBound || !sttBound) {
+//                    try {
+//                        wait(20);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+            ttsProvider = new SpeakMeReader(SpeakMePlugin.this);
+            sttProvider = new SpeakMeListener(SpeakMePlugin.this);
 
             // Do all the plugin work
             String text = msg.getData().getString("TEXT");
             performAction(text);
 
-            unbindService(mTTSConnection);
+            sttProvider.destroy();
+//            unbindService(mTTSConnection);
+//            unbindService(mSTTConnection);
 
             // Send restart signal
             Intent startIntent = new Intent();
@@ -141,9 +152,9 @@ public abstract class SpeakMePlugin extends Service {
      * @param speech
      */
     protected void invokeTTSReader(String speech) {
-        Log.d("TTS", "bound==" + ttsBound);
-        if (ttsBound) {
-            ttsProvider.setupTTS();
+//        Log.d("TTS", "bound==" + ttsBound);
+//        if (ttsBound) {
+//            ttsProvider.setupTTS();
             ttsProvider.invokeTTS(speech);
             while(!ttsProvider.isDoneSpeaking()) {
                 try {
@@ -154,13 +165,44 @@ public abstract class SpeakMePlugin extends Service {
                     Log.e(this.getClass().getCanonicalName(), e.getMessage());
                 }
             }
-        }
+//        }
+
 
     }
 
-    protected String[] retrieveSpeechToText(String query) {
-        invokeTTSReader(query);
-        return new String[]{};
+    protected String[] queryUser(String query, String errorMessage, boolean repeatOnError,
+                                 boolean repeatPromptOnError) {
+        String[] returnArray = null;
+        boolean repeated = false;
+        do {
+            try {
+                if (repeated && !repeatPromptOnError)
+                    returnArray = queryUser();
+                else
+                    returnArray = queryUser(query);
+            } catch (InvalidSpeechException e) {
+                invokeTTSReader(errorMessage);
+                repeated = true;
+            }
+        } while (repeatOnError && returnArray == null);
+        return returnArray;
+    }
+
+    protected String[] queryUser() throws InvalidSpeechException {
+        return queryUser(null);
+    }
+
+    protected String[] queryUser(String query) throws InvalidSpeechException {
+        if (query != null && !query.equals("")) {
+            Log.d("PLUGIN", "outputting prompt.");
+            invokeTTSReader(query);
+            Log.d("PLUGIN", "prompt complete.");
+        }
+//        if (sttBound) {
+//            sttProvider.setupListener(this);
+        return sttProvider.queryUser();
+//
+//        return new String[]{};
     }
 
 	@Override
@@ -169,22 +211,40 @@ public abstract class SpeakMePlugin extends Service {
 	}
 
     /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mTTSConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            Log.d("PLUGIN", "BINDING SUCCESS");
-            ttsProvider = (SpeakMeReader.TTSBinder) service;
-            ttsBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            Log.d("PLUGIN", "BINDING SUCCESS");
-            ttsBound = false;
-        }
-    };
+//    private ServiceConnection mTTSConnection = new ServiceConnection() {
+//
+//        @Override
+//        public void onServiceConnected(ComponentName className,
+//                                       IBinder service) {
+//            // We've bound to LocalService, cast the IBinder and get LocalService instance
+//            Log.d("PLUGIN", "BINDING SUCCESS");
+//            ttsProvider = (SpeakMeReader.TTSBinder) service;
+//            ttsBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName arg0) {
+//            Log.d("PLUGIN", "BINDING SUCCESS");
+//            ttsBound = false;
+//        }
+//    };
+//
+//    private ServiceConnection mSTTConnection = new ServiceConnection() {
+//
+//        @Override
+//        public void onServiceConnected(ComponentName className,
+//                                       IBinder service) {
+//            // We've bound to LocalService, cast the IBinder and get LocalService instance
+//            Log.d("PLUGIN", "BINDING SUCCESS");
+//            sttProvider = (SpeakMeListener.SpeechBinder) service;
+//            sttBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName arg0) {
+//            Log.d("PLUGIN", "BINDING SUCCESS");
+//            sttBound = false;
+//        }
+//    };
 
 }
