@@ -49,6 +49,9 @@ public class TwitterTimelineService extends SpeakMePlugin {
                             }
 
                         }
+                        else if (res.toLowerCase().contains("reply")) {
+
+                        }
                     }
                 }
                 tweetNum++;
@@ -57,9 +60,9 @@ public class TwitterTimelineService extends SpeakMePlugin {
     }
 
     private String convertTweetToText(String text) {
-        text = text.replaceAll("http://[a-zA-z0-9./]*", ". embedded link.");
+        text = text.replaceAll("http://[a-zA-z0-9./]*", ". hyperlink.");
         text = text.replaceAll("#", " hashtag ");
-        text = text.replaceAll("@[a-zA-Z0-9]+", " at ");
+        text = text.replaceAll("@", " at ");
         return text;
     }
 

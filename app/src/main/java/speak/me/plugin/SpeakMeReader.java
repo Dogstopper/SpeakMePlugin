@@ -1,7 +1,9 @@
 package speak.me.plugin;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
@@ -13,6 +15,7 @@ import java.util.Locale;
 
 public class SpeakMeReader {
 	private TextToSpeech tts;
+    private Service parent;
 
     private boolean speaking =  false;
     private String utteranceID = "utterance_id_speech";
@@ -22,6 +25,7 @@ public class SpeakMeReader {
 //    public void onCreate() {
 //        super.onCreate();
 //
+        this.parent = parent;
         tts = new TextToSpeech(parent.getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -75,8 +79,9 @@ public class SpeakMeReader {
     }
 
     public void textToSpeech(String text) {
-        this.utteranceID = text.replace(" ", "_");
-        speaking = true;
+        AudioManager am = (AudioManager)parent.getSystemService(Context.AUDIO_SERVICE);
+        am.setStreamMute(AudioManager.STREAM_SYSTEM,false);
+        am.setStreamMute(AudioManager.STREAM_MUSIC,false);
 
         HashMap<String, String> voiceMap = new HashMap();
         voiceMap.put(TextToSpeech.Engine.KEY_FEATURE_NETWORK_SYNTHESIS,"true");

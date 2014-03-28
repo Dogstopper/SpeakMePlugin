@@ -9,6 +9,7 @@ import java.util.List;
 import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
+import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -163,6 +164,25 @@ public class TwitterHandler {
             if (tweetNum < cache.size()) {
                 try {
                     m_twitter.retweetStatus(cache.get(tweetNum).getId());
+                    return true;
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean reply(int tweetNum, String text) {
+        if (cache != null) {
+            if (tweetNum < cache.size()) {
+                try {
+                    Status replyTo = cache.get(tweetNum);
+                    String screenName = replyTo.getUser().getScreenName();
+
+                    StatusUpdate st = new StatusUpdate(screenName + ": " + text);
+                    st.inReplyToStatusId(replyTo.getId());
+                    m_twitter.updateStatus(st);
                     return true;
                 } catch (TwitterException e) {
                     e.printStackTrace();
