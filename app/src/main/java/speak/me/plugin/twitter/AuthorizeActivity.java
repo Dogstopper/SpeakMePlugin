@@ -22,13 +22,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import speak.me.plugin.SpeakMeActivity;
 import speak.me.plugin.twitter.TwitterHandler;
 import speak.me.plugin.R;
 
 import twitter4j.Place;
 import twitter4j.auth.AccessToken;
 
-public class AuthorizeActivity extends ActionBarActivity {
+public class AuthorizeActivity extends SpeakMeActivity {
     public static final String RESULT_SUCCESS = "success";
     public static final String PREFS_FILE = "PREFS";
 
@@ -41,26 +42,15 @@ public class AuthorizeActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Toast.makeText(this, "Activity Starting", Toast.LENGTH_LONG).show();
-//        setContentView(R.layout.activity_authorize);
-//        PlaceholderFragment pf = new PlaceholderFragment();
-//        if (savedInstanceState == null) {
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.container, pf)
-//                    .commit();
-//        }
-//
-//        //Get the webview
-//        mWebView = (WebView) pf.getView().findViewById(R.id.webview);
         mWebView = new WebView(this);
         setContentView(mWebView);
 
-
-        //Initialize mHandler
+        // Initialize mHandler
         mHandler = new Handler();
 
-
-        //Initialize the TwitterHandler and load authorization url in WebView
+        // Initialize the TwitterHandler and load authorization url in WebView
         mTwitterHandler = new TwitterHandler();
         loadAuthorizationUrlInWebView();
     }
@@ -178,13 +168,13 @@ public class AuthorizeActivity extends ActionBarActivity {
     }
 
     private void onAuthenticationSuccessful(AccessToken accessToken) {
-        //Save the access token in the preferences
+        // Save the access token in the preferences
         Log.d("AUTHORIZE_ACTIVITY", "PIN SUCCESS");
         SharedPreferences preferences = getSharedPreferences(PREFS_FILE, MODE_MULTI_PROCESS);
         preferences.edit().putString("token", accessToken.getToken())
                           .putString("tokenSecret", accessToken.getTokenSecret()).commit();
 
-        //Return the result to the activity that created it (MainActivity)
+        // Return the result to the activity that created it (MainActivity)
         Intent returnIntent = new Intent();
         returnIntent.putExtra(AuthorizeActivity.RESULT_SUCCESS,true);
         setResult(RESULT_OK, returnIntent);
@@ -192,7 +182,7 @@ public class AuthorizeActivity extends ActionBarActivity {
     }
 
     private void onAuthenticationFailed() {
-        //Return the result to the activity that created it (MainActivity)
+        // Return the result to the activity that created it (MainActivity)
         Intent returnIntent = new Intent();
         returnIntent.putExtra(AuthorizeActivity.RESULT_SUCCESS,false);
         setResult(RESULT_OK,returnIntent);

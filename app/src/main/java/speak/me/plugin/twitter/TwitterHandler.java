@@ -133,7 +133,7 @@ public class TwitterHandler {
 
     private ResponseList<Status> cache = null;
     public String getFeedTweet(int tweetNum) {
-        final int cacheSize = 20;
+        final int cacheSize = 120;
         Log.d("TWITTER", "Getting tweet #:" +tweetNum);
         int page = tweetNum/cacheSize+1;
         int tweet = tweetNum%cacheSize;
