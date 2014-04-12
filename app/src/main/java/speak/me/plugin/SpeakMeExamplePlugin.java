@@ -10,8 +10,8 @@ public class SpeakMeExamplePlugin extends SpeakMePlugin{
     @Override
     public void performAction(String text) {
         Log.d("SPeakMeEXamplePlugin", "performAction() called");
-        this.invokeTTSReader("This is example text...");
-        this.invokeTTSReader("I am going to close up shop now.");
+        this.speak("This is example text...");
+        this.speak("I am going to close up shop now.");
         Log.d("SPeakMeEXamplePlugin", "performAction() finished");
 
     }

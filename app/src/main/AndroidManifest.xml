@@ -76,6 +76,21 @@
                 <category android:name="speak.me.category.DEFAULT_PLUGIN_CATEGORY" />
             </intent-filter>
         </service>
+
+        <service
+            android:name="speak.me.plugin.twitter.TwitterUserFinderService"
+            android:enabled="true"
+            android:exported="true" >
+
+            <meta-data
+                android:name="speak.me.keywords"
+                android:value="find,user" />
+
+            <intent-filter>
+                <action android:name="speak.me.action.PICK_PLUGIN" />
+                <category android:name="speak.me.category.DEFAULT_PLUGIN_CATEGORY" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

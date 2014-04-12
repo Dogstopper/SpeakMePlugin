@@ -46,7 +46,7 @@ public class TwitterTweetService extends SpeakMePlugin {
             }
         }
         if (!cb.result) {
-            invokeTTSReader("There was an error validating your credentials. Please login" +
+            speak("There was an error validating your credentials. Please login" +
                     "by saying, 'Twitter login' or 'Twitter settings'");
             return;
         }
@@ -56,8 +56,8 @@ public class TwitterTweetService extends SpeakMePlugin {
         do {
             // If we are logged in, then we should tweet!
 
-            invokeTTSReader("You said:");
-            invokeTTSReader(outputText);
+            speak("You said:");
+            speak(outputText);
             String[] poss = queryUser("Do you want to post? Yes to post, no to re-record, quit to stop..",
                     "I did not understand. Please repeat Yes, No, or quit", true, false);
 
@@ -67,7 +67,7 @@ public class TwitterTweetService extends SpeakMePlugin {
                     containsYes = true;
                 }
                 if (s.equalsIgnoreCase("quit")) {
-                    invokeTTSReader("Cancelling");
+                    speak("Cancelling");
                     return;
                 }
             }
@@ -101,9 +101,9 @@ public class TwitterTweetService extends SpeakMePlugin {
             }
         }
         if (cb.result) {
-            invokeTTSReader("Tweet success!");
+            speak("Tweet success!");
         } else {
-            invokeTTSReader("Tweet failed.");
+            speak("Tweet failed.");
         }
         Log.d("TWITTER", "DONE");
 

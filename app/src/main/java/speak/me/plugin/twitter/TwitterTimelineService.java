@@ -1,8 +1,10 @@
 package speak.me.plugin.twitter;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import speak.me.plugin.SpeakMePlugin;
+import twitter4j.TwitterException;
 
 /**
  * Created by stephen on 3/27/14.
@@ -25,18 +27,18 @@ public class TwitterTimelineService extends SpeakMePlugin {
     @Override
     public void performAction(String text) {
         if (checkLoggedIn()) {
-            invokeTTSReader("Reading your feed:");
+            speak("Reading your feed:");
             int tweetNum = 0;
             boolean quit = false;
             while (!quit) {
-                invokeTTSReader(convertTweetToText(handler.getFeedTweet(tweetNum)));
+                speak(convertTweetToText(handler.getFeedTweet(tweetNum),tweetNum));
                 String[] results = queryUser(null,"",false,false);
                 if (results != null) {
                     for (String res : results) {
                         if (res.toLowerCase().contains("stop") ||
                                 res.toLowerCase().contains("quit")) {
                             quit = true;
-                            invokeTTSReader("Quitting.");
+                            speak("Quitting.");
                             break;
                         } else if (res.toLowerCase().contains("next")) {
                             quit = false;
@@ -45,7 +47,7 @@ public class TwitterTimelineService extends SpeakMePlugin {
                         else if (res.toLowerCase().contains("re tweet") ||
                                 res.toLowerCase().contains("retweet")) {
                             if (handler.retweet(tweetNum)) {
-                                invokeTTSReader("Retweet successful");
+                                speak("Retweet successful");
                             }
 
                         }
@@ -59,14 +61,43 @@ public class TwitterTimelineService extends SpeakMePlugin {
         }
     }
 
-    private String convertTweetToText(String text) {
-        text = text.replaceAll("http://[a-zA-z0-9./]*", ". hyperlink.");
+    private String convertTweetToText(String text, int tweetNum) {
+        text = text.replaceAll("http(s)?://[a-zA-Z0-9./\\-]*", ". hyperlink.");
         text = text.replaceAll("#", " hashtag ");
-        text = text.replaceAll("@", " at ");
-        return text;
+//        text = text.replaceAll("@", " at ");
+
+        while (text.contains("@")) {
+            int locStart = text.indexOf("@");
+            int nextSpace = text.indexOf(" ", locStart);
+        if (locStart != -1) {
+            if (nextSpace == -1) {
+                nextSpace = text.length();
+            }
+
+            String screenname = text.substring(locStart,nextSpace);
+            screenname = screenname.replaceAll("@","");
+            char last = screenname.charAt(screenname.length()-1);
+            if (!Character.isLetterOrDigit(last)) {
+                screenname = screenname.substring(0,screenname.length()-1);
+            }
+            if (screenname.endsWith("'s")) {
+                screenname = screenname.substring(0,screenname.length()-2);
+            }
+            Log.d("TWITTER", "screenName = " + screenname);
+            String name = screenname;
+            try {
+                name = handler.getUserFromScreenName(screenname);
+            } catch (TwitterException e) {
+                e.printStackTrace();
+                break;
+            } finally {
+                Log.d("TWITTER", "Name = " + name);
+                text = text.replaceAll("@"+screenname, name);
+            }
+        }
     }
-
-
+    return text;
+    }
 
     private boolean checkLoggedIn() {
         class ResultCallback implements BooleanCallback {
@@ -95,7 +126,7 @@ public class TwitterTimelineService extends SpeakMePlugin {
             }
         }
         if (!cb.result) {
-            invokeTTSReader("There was an error validating your credentials. Please login" +
+            speak("There was an error validating your credentials. Please login" +
                     "by saying, 'Twitter settings'");
             return false;
         }

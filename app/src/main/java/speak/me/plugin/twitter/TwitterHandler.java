@@ -6,6 +6,8 @@ import android.util.Log;
 
 import java.util.List;
 
+
+import twitter4j.IDs;
 import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
@@ -13,6 +15,7 @@ import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
@@ -20,8 +23,8 @@ import twitter4j.conf.ConfigurationBuilder;
 import speak.me.plugin.twitter.BooleanCallback;
 
 public class TwitterHandler {
-    public static final String CONSUMER_KEY = "Tnts4MdH0J3EEmKd2QlRg";
-    public static final String CONSUMER_SECRET = "Ru0Uzukxj6tFFHGLaNTv7MGCBSIiXts9LHUmED7DY";
+    public static final String CONSUMER_KEY = "BHi8Bu5wU0lu6zp7FUsqA";
+    public static final String CONSUMER_SECRET = "ydMyJFs1lFAXPLljodPmRUub6zZn7e6ZS5GpsuOXA";
 
     public String m_consumerKey;
     public String m_consumerSecret;
@@ -130,21 +133,23 @@ public class TwitterHandler {
 
     private ResponseList<Status> cache = null;
     public String getFeedTweet(int tweetNum) {
-        int page = tweetNum/40+1;
-        int tweet = tweetNum%40;
+        final int cacheSize = 20;
+        Log.d("TWITTER", "Getting tweet #:" +tweetNum);
+        int page = tweetNum/cacheSize+1;
+        int tweet = tweetNum%cacheSize;
 
         if (cache == null) {
             try {
-                cache = m_twitter.getHomeTimeline(new Paging(page,40));
+                cache = m_twitter.getHomeTimeline(new Paging(page,cacheSize));
             } catch (TwitterException e) {
                 e.printStackTrace();
             }
         }
 
-        if (tweet >= cache.size()) {
+        if (tweetNum >= cache.size()) {
             long id = cache.get(cache.size()-1).getId();
             try {
-                cache = m_twitter.getHomeTimeline(new Paging(id));
+                cache = m_twitter.getHomeTimeline(new Paging(   id));
             } catch (TwitterException e) {
                 e.printStackTrace();
             }
@@ -152,7 +157,7 @@ public class TwitterHandler {
 
         Status s = cache.get(tweet);
         if (s.isRetweet()) {
-            return s.getUser().getName() + "re tweeted " + s.getText();
+            return s.getUser().getName() + "retweeted " + s.getText().replaceAll("RT", "");
         }
         else {
             return s.getUser().getName() + " said " + s.getText();
@@ -214,5 +219,11 @@ public class TwitterHandler {
 
         new TweetTask().execute();
 
+    }
+
+    public String getUserFromScreenName(String screenName) throws TwitterException {
+//        Twitter twit = new TwitterFactory().getInstance();
+        User u = m_twitter.showUser(screenName);
+        return u.getName();
     }
 }

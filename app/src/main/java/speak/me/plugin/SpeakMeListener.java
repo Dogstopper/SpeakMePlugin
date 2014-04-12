@@ -33,7 +33,6 @@ public class SpeakMeListener {
     public SpeakMeListener(Service parent) {
         this.parent = parent;
         mainThread = new Handler(parent.getApplication().getMainLooper());
-        silenceTimout = 3000;
     }
 
 
