@@ -1,0 +1,5 @@
+app/build/**
+speakmeplugin.iml
+.DS_Store
+.gradle/
+.idea/**

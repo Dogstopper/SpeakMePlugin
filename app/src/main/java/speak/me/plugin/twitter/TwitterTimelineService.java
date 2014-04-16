@@ -3,6 +3,8 @@ package speak.me.plugin.twitter;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.util.Arrays;
+
 import speak.me.plugin.SpeakMePlugin;
 import twitter4j.TwitterException;
 
@@ -52,7 +54,9 @@ public class TwitterTimelineService extends SpeakMePlugin {
 
                         }
                         else if (res.toLowerCase().contains("reply")) {
-
+                            postReply(queryUser("Please state your reply.",
+                                    "I did not understand your query. Please try again.",
+                                    true, false)[0]);
                         }
                     }
                 }
@@ -100,19 +104,6 @@ public class TwitterTimelineService extends SpeakMePlugin {
     }
 
     private boolean checkLoggedIn() {
-        class ResultCallback implements BooleanCallback {
-            public boolean invoked = false;
-            public boolean result = true;
-
-            @Override
-            public void run(boolean bool) {
-                invoked = true;
-                if (!bool) {
-                    result = false;
-                }
-            }
-        };
-
         // Check that we're logged in.
         ResultCallback cb = new ResultCallback();
         handler.verifyCredentials(cb);
@@ -132,5 +123,57 @@ public class TwitterTimelineService extends SpeakMePlugin {
         }
         return true;
     }
+
+    private void postReply(String text) {
+        boolean containsYes = false;
+        String outputText = TwitterTweetService.twitterify(text);
+        do {
+            // If we are logged in, then we should tweet!
+
+            speak("You said:");
+            speak(outputText);
+            String[] poss = queryUser("Do you want to post? Yes to post, no to re-record, quit to stop..",
+                    "I did not understand. Please repeat Yes, No, or quit", true, false);
+
+
+            for (String s : poss) {
+                if (s.equalsIgnoreCase("yes")) {
+                    containsYes = true;
+                }
+                if (s.equalsIgnoreCase("quit")) {
+                    speak("Cancelling");
+                    return;
+                }
+            }
+            if (!containsYes) {
+                String[] tweets = queryUser("Please repeat your tweet.",
+                        "I'm sorry, there seems to be a problem recognizing your voice",
+                        true, false);
+                Log.d("Tweeter", "Possibilities: " + Arrays.toString(tweets));
+                if (tweets.length > 0) {
+                    outputText = TwitterTweetService.twitterify(tweets[0]);
+                } else {
+                    outputText = "";
+                }
+            }
+        } while(!containsYes);
+
+
+        ResultCallback cb = new ResultCallback();
+        handler.tweet(outputText, -1, cb);
+    }
+
+    class ResultCallback implements BooleanCallback {
+        public boolean invoked = false;
+        public boolean result = true;
+
+        @Override
+        public void run(boolean bool) {
+            invoked = true;
+            if (!bool) {
+                result = false;
+            }
+        }
+    };
 
 }

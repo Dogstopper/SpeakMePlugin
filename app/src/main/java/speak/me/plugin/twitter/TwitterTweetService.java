@@ -86,7 +86,7 @@ public class TwitterTweetService extends SpeakMePlugin {
 
 
         cb = new ResultCallback();
-        handler.tweet(outputText, cb);
+        handler.tweet(outputText, -1, cb);
 
         Log.d("TWITTER", "SPOKEN: " + text);
         Log.d("TWITTER", "TWEETED: " + outputText);
@@ -122,7 +122,7 @@ public class TwitterTweetService extends SpeakMePlugin {
         }
     };
 
-    private String twitterify(String text) {
+    public static String twitterify(String text) {
         text = text.replaceFirst("[T|t]witter", "");
         text = text.replaceFirst("[T|t]weet", "");
         text = text.trim();
@@ -166,7 +166,7 @@ public class TwitterTweetService extends SpeakMePlugin {
 
     }
 
-    private int findNonNegativeMin(List<Integer> list)
+    private static int findNonNegativeMin(List<Integer> list)
     {
         Log.d("HASHTAGIFY", Arrays.toString(list.toArray()));
         int min = Integer.MAX_VALUE;
@@ -180,7 +180,7 @@ public class TwitterTweetService extends SpeakMePlugin {
         return min;
     }
 
-    private String fixHashtags(String hashtagString) {
+    private static String fixHashtags(String hashtagString) {
         hashtagString = hashtagString.replaceAll("hashtag", "#");
         hashtagString = hashtagString.replaceAll("hash tag", "#");
         String[] parts = hashtagString.split(" ");

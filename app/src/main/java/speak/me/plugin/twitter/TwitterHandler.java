@@ -111,14 +111,18 @@ public class TwitterHandler {
     }
 
     //The callback is called when the tweet is complete. It passes true on success, false otherwise
-    public void tweet(String text, final BooleanCallback callback) {
+    public void tweet(String text, final long inReplyTo, final BooleanCallback callback) {
         class TweetTask extends AsyncTask<String, Void, Boolean> {
 
             private Exception exception;
 
             protected Boolean doInBackground(String... tweet) {
                 try {
-                    twitter4j.Status status = m_twitter.updateStatus(tweet[0]);
+                    StatusUpdate st = new StatusUpdate(tweet[0]);
+                    if (inReplyTo != -1) {
+                        st.inReplyToStatusId(inReplyTo);
+                    }
+                    twitter4j.Status status = m_twitter.updateStatus(st);
                     callback.run(true);
                 } catch (TwitterException e) {
                     Log.e("LazyTweeter", "ERROR: " + e);
