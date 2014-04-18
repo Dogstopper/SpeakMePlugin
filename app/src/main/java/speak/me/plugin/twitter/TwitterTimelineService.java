@@ -56,7 +56,8 @@ public class TwitterTimelineService extends SpeakMePlugin {
                         else if (res.toLowerCase().contains("reply")) {
                             postReply(queryUser("Please state your reply.",
                                     "I did not understand your query. Please try again.",
-                                    true, false)[0]);
+                                    true, false)[0], handler.getReplyId(tweetNum));
+                            speak("Reply Successful");
                         }
                     }
                 }
@@ -70,6 +71,7 @@ public class TwitterTimelineService extends SpeakMePlugin {
         text = text.replaceAll("#", " hashtag ");
 //        text = text.replaceAll("@", " at ");
 
+        text = text.replaceAll("\\s@\\s", " at ");
         while (text.contains("@")) {
             int locStart = text.indexOf("@");
             int nextSpace = text.indexOf(" ", locStart);
@@ -124,8 +126,10 @@ public class TwitterTimelineService extends SpeakMePlugin {
         return true;
     }
 
-    private void postReply(String text) {
+    private void postReply(String text, long inReplyTo) {
         boolean containsYes = false;
+
+
         String outputText = TwitterTweetService.twitterify(text);
         do {
             // If we are logged in, then we should tweet!
@@ -160,7 +164,7 @@ public class TwitterTimelineService extends SpeakMePlugin {
 
 
         ResultCallback cb = new ResultCallback();
-        handler.tweet(outputText, -1, cb);
+        handler.tweet(outputText, inReplyTo, cb);
     }
 
     class ResultCallback implements BooleanCallback {

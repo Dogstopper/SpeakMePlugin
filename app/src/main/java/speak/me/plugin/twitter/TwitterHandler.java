@@ -168,6 +168,16 @@ public class TwitterHandler {
         }
     }
 
+    public long getReplyId(int tweetNum) {
+        if (cache != null) {
+            if (tweetNum < cache.size()) {
+                long id = cache.get(tweetNum).getId();
+                return id;
+            }
+        }
+        return -1;
+    }
+
     public boolean retweet(int tweetNum) {
         if (cache != null) {
             if (tweetNum < cache.size()) {
