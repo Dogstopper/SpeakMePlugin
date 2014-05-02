@@ -171,7 +171,7 @@ public class TwitterHandler {
     public long getReplyId(int tweetNum) {
         if (cache != null) {
             if (tweetNum < cache.size()) {
-                long id = cache.get(tweetNum).getId();
+                long id = cache.get(tweetNum).getUser().getId();
                 return id;
             }
         }
@@ -239,5 +239,10 @@ public class TwitterHandler {
 //        Twitter twit = new TwitterFactory().getInstance();
         User u = m_twitter.showUser(screenName);
         return u.getName();
+    }
+
+    public String getUsernameFromID(long id) throws  TwitterException{
+        String username = m_twitter.showUser(id).getScreenName();
+        return username;
     }
 }

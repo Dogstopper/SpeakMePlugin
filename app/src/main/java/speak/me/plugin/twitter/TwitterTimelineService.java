@@ -40,7 +40,7 @@ public class TwitterTimelineService extends SpeakMePlugin {
                         if (res.toLowerCase().contains("stop") ||
                                 res.toLowerCase().contains("quit")) {
                             quit = true;
-                            speak("Quitting.");
+                            speak("Goodbye.");
                             break;
                         } else if (res.toLowerCase().contains("next")) {
                             quit = false;
@@ -57,7 +57,11 @@ public class TwitterTimelineService extends SpeakMePlugin {
                             postReply(queryUser("Please state your reply.",
                                     "I did not understand your query. Please try again.",
                                     true, false)[0], handler.getReplyId(tweetNum));
-                            speak("Reply Successful");
+
+                            // DO NOT REMOVE. EVEN THOUGH YOU DO NOT SEE A LOOP,
+                            // THIS SOMETIMES LOOPS UNEXPECTEDLY.
+                            // Somehow, the break stops it from occurring.
+                            break;
                         }
                     }
                 }
@@ -136,8 +140,8 @@ public class TwitterTimelineService extends SpeakMePlugin {
 
             speak("You said:");
             speak(outputText);
-            String[] poss = queryUser("Do you want to post? Yes to post, no to re-record, quit to stop..",
-                    "I did not understand. Please repeat Yes, No, or quit", true, false);
+            String[] poss = queryUser("Sound good? Yes to post, no to change.",
+                    "Oops, I didn't catch that. Please repeat Yes, No, or quit", true, false);
 
 
             for (String s : poss) {
@@ -151,7 +155,7 @@ public class TwitterTimelineService extends SpeakMePlugin {
             }
             if (!containsYes) {
                 String[] tweets = queryUser("Please repeat your tweet.",
-                        "I'm sorry, there seems to be a problem recognizing your voice",
+                        "I'm sorry, I did not catch that.",
                         true, false);
                 Log.d("Tweeter", "Possibilities: " + Arrays.toString(tweets));
                 if (tweets.length > 0) {
@@ -162,9 +166,16 @@ public class TwitterTimelineService extends SpeakMePlugin {
             }
         } while(!containsYes);
 
+        try {
+            String username = handler.getUsernameFromID(inReplyTo);
+            outputText = "@" + username + ": " + outputText;
+        } catch (TwitterException e) {
+            speak("Posted but not replied");
+        }
 
         ResultCallback cb = new ResultCallback();
         handler.tweet(outputText, inReplyTo, cb);
+        return;
     }
 
     class ResultCallback implements BooleanCallback {
